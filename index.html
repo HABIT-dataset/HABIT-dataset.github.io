@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HABIT: Human-Aware Behavior and Interaction Training Dataset for Robot Manipulation</title>
+<meta name="description" content="HABIT is a large-scale robot manipulation dataset for human-present environments, spanning 10,563 episodes and 164 hours across 60 tasks and three interaction roles.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;
+    --bg-soft:#f7f8fa;
+    --bg-softer:#eef1f5;
+    --ink:#16181d;
+    --ink-soft:#454b54;
+    --ink-faint:#7a828d;
+    --line:#e4e8ee;
+    --accent:#3b5bdb;
+    --accent-soft:#edf0fe;
+    --ro:#c2c9d4;
+    --collab:#2f6fed;
+    --collab-soft:#e8f0fe;
+    --cowork:#e8820c;
+    --cowork-soft:#fdf0dd;
+    --super:#1aa06d;
+    --super-soft:#e2f5ec;
+    --radius:16px;
+    --maxw:1080px;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 28px rgba(16,24,40,.06);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+  .narrow{max-width:760px;margin-left:auto;margin-right:auto;}
+  h1,h2,h3{font-family:'Newsreader',Georgia,serif;font-weight:600;letter-spacing:-.01em;line-height:1.15;}
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  /* ---------- nav ---------- */
+  nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);
+    backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);}
+  nav .wrap{display:flex;align-items:center;gap:8px;height:58px;}
+  nav .brand{font-weight:800;letter-spacing:.02em;font-size:16px;margin-right:auto;}
+  nav .brand span{color:var(--accent);}
+  nav .links{display:flex;gap:2px;flex-wrap:wrap;}
+  nav .links a{color:var(--ink-soft);font-size:13.5px;font-weight:500;padding:7px 12px;border-radius:8px;transition:background .14s,color .14s;}
+  nav .links a:hover{background:var(--bg-soft);color:var(--ink);text-decoration:none;}
+  nav .links a.active{color:var(--accent);background:var(--accent-soft);}
+  @media(max-width:780px){nav .links{display:none;}}
+
+  /* ---------- hero ---------- */
+  header.hero{padding:74px 0 44px;text-align:center;
+    background:radial-gradient(1200px 380px at 50% -120px,#eef2ff 0%,rgba(255,255,255,0) 70%);}
+  .badge{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--accent);background:var(--accent-soft);padding:5px 13px;border-radius:999px;margin-bottom:22px;}
+  header.hero h1{font-size:clamp(24px,3.5vw,40px);margin:0 auto 14px;max-width:1000px;line-height:1.2;}
+  header.hero .subtitle{font-size:clamp(16px,2.2vw,19px);color:var(--ink-soft);
+    font-family:'Newsreader';font-style:italic;max-width:960px;margin:0 auto 30px;}
+  .authors{font-size:19px;color:var(--ink);margin:0 auto 8px;max-width:880px;line-height:1.85;}
+  .authors a{color:var(--ink);}
+  .authors sup{color:var(--accent);font-weight:600;font-size:.72em;}
+  .affils{font-size:16px;color:var(--ink-faint);margin-bottom:32px;}
+  .affils sup{color:var(--accent);font-weight:600;}
+  .affils a{color:inherit;}
+  .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:600;padding:11px 19px;
+    border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:#fff;
+    transition:transform .12s ease,box-shadow .12s ease;}
+  .btn:hover{text-decoration:none;transform:translateY(-1px);box-shadow:var(--shadow);}
+  .btn.ghost{background:#fff;color:var(--ink);border-color:var(--line);}
+  .btn svg{width:17px;height:17px;}
+
+  /* ---------- sections ---------- */
+  section{padding:66px 0;border-top:1px solid var(--line);}
+  .eyebrow{display:block;text-align:center;font-size:13px;font-weight:700;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+  .sec-title{font-size:clamp(26px,3.6vw,36px);text-align:center;margin:0 auto 14px;max-width:none;}
+  .sec-lead{text-align:center;color:var(--ink-soft);font-size:17px;max-width:64ch;margin:0 auto 36px;text-wrap:balance;}
+  p{color:var(--ink-soft);}
+  .body-p{font-size:17px;color:var(--ink-soft);}
+  .body-p strong{color:var(--ink);font-weight:600;}
+
+  /* ---------- stat counters ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  .stat{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:26px 16px;text-align:center;}
+  .stat .num{font-family:'Newsreader';font-size:clamp(30px,4.6vw,44px);font-weight:600;color:var(--ink);line-height:1;letter-spacing:-.02em;}
+  .stat .num small{font-size:.5em;color:var(--ink-faint);font-weight:500;}
+  .stat .lbl{font-size:13px;color:var(--ink-faint);margin-top:8px;font-weight:500;}
+  @media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr);}}
+
+  /* ---------- video / figures ---------- */
+  figure{margin:0;}
+  .video-card{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);}
+  .video-card video{display:block;width:100%;height:auto;background:#0d0f13;}
+  .video-cap{padding:13px 18px 15px;font-size:14px;color:var(--ink-soft);}
+  .video-cap b{color:var(--ink);font-weight:600;}
+  .fig{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 6px;margin:0 0 22px;box-shadow:var(--shadow);}
+  .fig img{display:block;width:100%;height:auto;border-radius:8px;}
+  .fig figcaption{font-size:13.5px;color:var(--ink-soft);margin:13px 4px 10px;line-height:1.55;}
+  .fig figcaption b{color:var(--ink);font-weight:600;}
+  .fig .fig-tag{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);}
+
+  /* role pills */
+  .pill{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    padding:3px 10px;border-radius:999px;vertical-align:middle;}
+  .pill.collab{color:var(--collab);background:var(--collab-soft);}
+  .pill.cowork{color:var(--cowork);background:var(--cowork-soft);}
+  .pill.super{color:var(--super);background:var(--super-soft);}
+
+  /* ---------- setup figure ---------- */
+  .setup{display:grid;grid-template-columns:1.05fr .95fr;gap:30px;align-items:center;margin:0 0 14px;}
+  .setup .fig{margin:0;}
+  .setup h3{font-size:21px;margin:0 0 12px;}
+  .setup p{font-size:15.5px;margin:0 0 12px;}
+  .setup ul{margin:0;padding-left:18px;font-size:14.5px;color:var(--ink-soft);}
+  .setup ul li{margin-bottom:5px;}
+  .setup ul b{color:var(--ink);}
+  @media(max-width:820px){.setup{grid-template-columns:1fr;gap:18px;}}
+
+  /* ---------- roles ---------- */
+  .roles{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:30px;}
+  .role{border:1px solid var(--line);border-radius:var(--radius);padding:24px 22px;background:#fff;position:relative;overflow:hidden;}
+  .role:before{content:"";position:absolute;top:0;left:0;right:0;height:4px;}
+  .role.collab:before{background:var(--collab);}
+  .role.cowork:before{background:var(--cowork);}
+  .role.super:before{background:var(--super);}
+  .role h3{font-size:21px;margin:8px 0 8px;}
+  .role .role-meta{font-size:12.5px;color:var(--ink-faint);font-weight:600;margin-bottom:12px;font-family:'JetBrains Mono',monospace;letter-spacing:-.02em;}
+  .role p{font-size:14.5px;margin:0;}
+  @media(max-width:820px){.roles{grid-template-columns:1fr;}}
+
+  /* ---------- elicitation rows ---------- */
+  .elic{display:grid;grid-template-columns:0.78fr 1.22fr;gap:34px;align-items:center;margin-bottom:46px;}
+  .elic:last-child{margin-bottom:0;}
+  .elic.flip{grid-template-columns:1.22fr 0.78fr;}
+  .elic.flip .txt{order:2;}
+  .elic .kicker{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+  .elic h3{font-size:23px;margin:0 0 12px;}
+  .elic p{font-size:15.5px;margin:0;}
+  .elic .quote{border-left:3px solid var(--line);padding:4px 0 4px 16px;font-family:'Newsreader';font-style:italic;font-size:15.5px;color:var(--ink-soft);margin-top:14px;}
+  @media(max-width:820px){.elic,.elic.flip,.elic.epanel,.elic.flip.epanel{grid-template-columns:1fr;gap:18px;}.elic.flip .txt{order:0;}}
+  /* elicitation toggle */
+  .elic-tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:34px;}
+  .etab{font-family:inherit;font-size:14px;font-weight:600;padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;display:inline-flex;align-items:center;gap:9px;transition:all .14s;}
+  .etab .dot{width:9px;height:9px;border-radius:50%;background:var(--ink-faint);transition:background .14s;}
+  .etab.collab .dot{background:var(--collab);} .etab.cowork .dot{background:var(--cowork);} .etab.super .dot{background:var(--super);}
+  .etab:hover{border-color:var(--ink-faint);}
+  .etab.active{color:#fff;border-color:transparent;}
+  .etab.active .dot{background:rgba(255,255,255,.92);}
+  .etab.active.collab{background:var(--collab);} .etab.active.cowork{background:var(--cowork);} .etab.active.super{background:var(--super);}
+  .elic.epanel{display:none;grid-template-columns:0.6fr 1.4fr;}
+  .elic.flip.epanel{grid-template-columns:1.4fr 0.6fr;}
+  .elic.epanel.show{display:grid;animation:fade .35s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .elic-nav{display:flex;align-items:center;justify-content:center;gap:20px;margin-top:32px;}
+  .enav{font-family:inherit;font-size:13.5px;font-weight:600;color:var(--ink-soft);background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer;transition:all .14s;}
+  .enav:hover{border-color:var(--ink-faint);color:var(--ink);}
+  .edots{display:flex;gap:7px;}
+  .edots i{width:8px;height:8px;border-radius:50%;background:var(--line);transition:background .2s,transform .2s;}
+  .edots i.on{background:var(--accent);transform:scale(1.3);}
+
+  /* ---------- comparison videos (toggle) ---------- */
+  .cmp-stage{max-width:860px;margin:0 auto;}
+  .cpanel{display:none;}
+  .cpanel.show{display:block;animation:fade .35s ease;}
+
+  /* ---------- workflow: node graph (left) + dual views (right) ---------- */
+  .wfpanel{display:none;}
+  .wfpanel.show{display:block;animation:fade .35s ease;}
+  .wf-layout{display:grid;grid-template-columns:minmax(250px,300px) 1fr;gap:30px;align-items:stretch;
+    background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px 30px;box-shadow:var(--shadow);}
+  .wf-right{display:flex;flex-direction:column;justify-content:center;gap:14px;
+    border-left:2px dotted #cdd4de;padding-left:32px;}
+  .wf-views{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .wf-views .video-card video{background:#0d0f13;}
+  .wf-cap{max-width:860px;margin:16px auto 0;text-align:center;font-size:14px;color:var(--ink-faint);line-height:1.6;}
+  .wf-cap b{color:var(--ink-soft);}
+  .wf-hint{text-align:center;font-size:12.5px;color:var(--ink-faint);margin:0 0 20px;}
+  .wf-graph-wrap{display:flex;align-items:center;justify-content:center;}
+  .wf-svg{width:100%;max-width:280px;height:auto;display:block;overflow:visible;}
+  .wf-col{font:600 12px Inter,sans-serif;fill:var(--ink-soft);text-anchor:middle;}
+  .wf-edge{stroke:#1c1f26;stroke-width:2.6;}
+  .wf-arrow{fill:#1c1f26;}
+  .wnode{cursor:pointer;transform-box:fill-box;transform-origin:center;transition:transform .2s cubic-bezier(.2,.7,.2,1);}
+  .wnode circle{stroke:#fff;stroke-width:2.5;transition:stroke-width .2s,filter .2s;}
+  .wnode text{font:700 14px Inter,sans-serif;fill:#1c1f26;text-anchor:middle;dominant-baseline:central;pointer-events:none;}
+  .wnode:hover{transform:scale(1.07);}
+  .wnode.active{transform:scale(1.12);}
+  .wnode.active circle{stroke-width:3;filter:drop-shadow(0 3px 6px rgba(16,24,40,.32));}
+  /* active-step instruction(s), shown above the videos */
+  .wf-instr{display:flex;flex-direction:column;gap:8px;}
+  .wf-iline{font-size:13.5px;line-height:1.45;color:#1c1f26;border-radius:10px;padding:10px 14px;animation:fade .3s ease;}
+  .wf-iline b{font-weight:700;margin-right:3px;}
+  @media(max-width:820px){.wf-layout{grid-template-columns:1fr;gap:22px;padding:20px;}
+    .wf-right{border-left:none;border-top:2px dotted #cdd4de;padding-left:0;padding-top:22px;}.wf-svg{max-width:260px;margin:0 auto;}}
+  @media(max-width:520px){.wf-views{grid-template-columns:1fr;}}
+
+  /* ---------- tabs (gallery) ---------- */
+  .tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:28px;}
+  .tab{font-size:14px;font-weight:600;padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;transition:all .14s ease;}
+  .tab:hover{border-color:var(--ink-faint);}
+  .tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;}
+  @media(max-width:820px){.gallery{grid-template-columns:1fr;}}
+  .gallery .video-card.hide{display:none;}
+
+  /* ---------- interactive success chart ---------- */
+  .chart-card{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px 20px;}
+  .chart-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px;}
+  .chart-head h4{font-family:'Inter';font-size:15.5px;font-weight:700;margin:0;color:var(--ink);}
+  .chart-head .sub{font-size:13px;color:var(--ink-faint);margin:2px 0 0;}
+  .toggle{display:inline-flex;background:var(--bg-softer);border-radius:999px;padding:3px;}
+  .toggle button{border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink-soft);padding:7px 15px;border-radius:999px;cursor:pointer;transition:all .15s;}
+  .toggle button.active{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .vchart{position:relative;padding-left:34px;margin-top:18px;}
+  .vgrid{position:absolute;left:34px;right:0;top:0;height:280px;}
+  .vgrid .gl{position:absolute;left:0;right:0;border-top:1px solid var(--line);}
+  .vgrid .gl span{position:absolute;left:-30px;top:-8px;font-size:11px;color:var(--ink-faint);width:26px;text-align:right;}
+  .vplot{position:relative;display:flex;gap:14px;height:280px;align-items:flex-end;border-bottom:2px solid #d4dae3;z-index:1;}
+  .vcol{flex:1;display:flex;justify-content:center;align-items:flex-end;gap:7px;height:100%;}
+  .vbar{width:clamp(16px,3vw,32px);border-radius:5px 5px 0 0;height:0;position:relative;transition:height .9s cubic-bezier(.2,.7,.2,1);}
+  .vbar.ro{background:var(--ro);}
+  .vbar.habit{background:var(--accent);}
+  .vbar.na{background:transparent;border:1px dashed #cfd6df;}
+  .vbar .vval{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:600;color:var(--ink);white-space:nowrap;}
+  .vbar.na .vval{color:var(--ink-faint);font-weight:500;}
+  .vbar:hover{filter:brightness(.94);}
+  .vx{display:flex;gap:14px;padding-left:34px;margin-top:9px;}
+  .vx > div{flex:1;text-align:center;font-size:12px;color:var(--ink-soft);line-height:1.35;}
+  .vx .rx{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
+  .vx .rx.collab{color:var(--collab);}
+  .vx .rx.cowork{color:var(--cowork);}
+  .vx .rx.super{color:var(--super);}
+  .ylab{position:absolute;left:-8px;top:50%;transform:rotate(-90deg) translateX(50%);transform-origin:left center;font-size:11.5px;color:var(--ink-faint);white-space:nowrap;}
+  .legend{display:flex;gap:18px;justify-content:center;margin-top:20px;font-size:12.5px;color:var(--ink-soft);}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;}
+
+  .takeaway{background:var(--accent-soft);border:1px solid #d5ddfb;border-radius:var(--radius);padding:20px 24px;margin-top:26px;font-size:15.5px;color:var(--ink);}
+  .takeaway b{font-weight:700;}
+  .define{background:var(--bg-soft);border:1px solid var(--line);border-left:3px solid var(--ink-faint);border-radius:10px;padding:16px 20px;margin:0 auto 26px;font-size:14.5px;color:var(--ink-soft);max-width:760px;}
+  .define b{color:var(--ink);}
+  .block-title{text-align:center;font-size:23px;margin:56px 0 8px;}
+
+  pre{background:#0f1115;color:#dfe3ea;border-radius:var(--radius);padding:22px 24px;overflow:auto;font-family:'JetBrains Mono',monospace;font-size:13px;}
+  footer{padding:46px 0 60px;text-align:center;color:var(--ink-faint);font-size:13.5px;border-top:1px solid var(--line);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">HA<span>BIT</span></div>
+    <div class="links">
+      <a href="#gallery">Gallery</a>
+      <a href="#overview">Overview</a>
+      <a href="#roles">Roles</a>
+      <a href="#reactive">Reactivity</a>
+      <a href="#elicitation">Behavior</a>
+      <a href="#results">Results</a>
+      <a href="#bibtex">Cite</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="badge">Robot Manipulation Dataset</span>
+    <h1>HABIT: Human-Aware Behavior and Interaction<br>Training Dataset for Robot Manipulation</h1>
+    <p class="subtitle">A large-scale robot manipulation dataset for environments shared with humans.</p>
+    <p class="authors">
+      <a href="https://songjaehwi.github.io/" target="_blank" rel="noopener">Jaehwi Song</a><sup>1</sup>,
+      <a href="https://sites.google.com/view/suchaejeong" target="_blank" rel="noopener">Suchae Jeong</a><sup>1,2</sup>,
+      <a href="https://linkedin.com/in/byeongguk-jeon-4b62b627a" target="_blank" rel="noopener">Byeongguk Jeon</a><sup>1,2</sup>,<br>
+      <a href="https://scholar.google.com/citations?user=xKrSnDoAAAAJ&amp;hl=ko" target="_blank" rel="noopener">Sungdong Kim</a><sup>1,2</sup>,
+      <a href="https://seominjoon.github.io/" target="_blank" rel="noopener">Minjoon Seo</a><sup>1,2</sup>,
+      <a href="https://scholar.google.com/citations?user=NQQ-CdEAAAAJ&amp;hl=en" target="_blank" rel="noopener">Hyungmok Son</a><sup>1</sup>,
+      <a href="https://sites.google.com/view/kiminlee/" target="_blank" rel="noopener">Kimin Lee</a><sup>1,2</sup>
+    </p>
+    <p class="affils"><sup>1</sup><a href="https://config.inc/" target="_blank" rel="noopener">Config</a> &nbsp;&nbsp; <sup>2</sup><a href="https://www.kaist.ac.kr/en/" target="_blank" rel="noopener">KAIST</a></p>
+    <div class="btns">
+      <a class="btn" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Paper</a>
+      <a class="btn ghost" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>arXiv</a>
+      <a class="btn ghost" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>Dataset</a>
+      <a class="btn ghost" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12 12 0 0 0-6.2 0C7 .7 5.9 1 5.9 1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4.5 7.4c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>Code</a>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== GALLERY (hook) ===================== -->
+<section id="gallery">
+  <div class="wrap">
+    <span class="eyebrow">Policy rollouts</span>
+    <h2 class="sec-title">What HABIT enables</h2>
+    <p class="sec-lead" style="max-width:1000px">Real policy rollouts after training on HABIT, a large-scale dataset of robot manipulation demonstrations collected with a human sharing the workspace. The same data teaches tasks across all three interaction roles; a few of the 60 are shown here.</p>
+    <div class="tabs">
+      <button class="tab active" data-filter="all">All</button>
+      <button class="tab" data-filter="collab">Collaborator</button>
+      <button class="tab" data-filter="cowork">Coworker</button>
+      <button class="tab" data-filter="super">Supervisor</button>
+    </div>
+    <div class="gallery">
+      <figure class="video-card" data-role="collab">
+        <video src="static/videos/task_shelf-cleaning.mp4" muted loop playsinline controls preload="metadata"></video>
+        <figcaption class="video-cap"><b>Shelf Cleaning</b> <span class="pill collab">Collaborator</span></figcaption>
+      </figure>
+      <figure class="video-card" data-role="collab">
+        <video src="static/videos/task_table-service.mp4" muted loop playsinline controls preload="metadata"></video>
+        <figcaption class="video-cap"><b>Table Service</b> <span class="pill collab">Collaborator</span></figcaption>
+      </figure>
+      <figure class="video-card" data-role="collab">
+        <video src="static/videos/task_box-packaging.mp4" muted loop playsinline controls preload="metadata"></video>
+        <figcaption class="video-cap"><b>Box Packaging</b> <span class="pill collab">Collaborator</span></figcaption>
+      </figure>
+      <figure class="video-card" data-role="cowork">
+        <video src="static/videos/task_donut-serving.mp4" muted loop playsinline controls preload="metadata"></video>
+        <figcaption class="video-cap"><b>Donut Serving</b> <span class="pill cowork">Coworker</span></figcaption>
+      </figure>
+      <figure class="video-card" data-role="super">
+        <video src="static/videos/task_cup-handling.mp4" muted loop playsinline controls preload="metadata"></video>
+        <figcaption class="video-cap"><b>Cup Handling</b> <span class="pill super">Supervisor</span></figcaption>
+      </figure>
+      <figure class="video-card" data-role="super">
+        <video src="static/videos/task_lint-rolling.mp4" muted loop playsinline controls preload="metadata"></video>
+        <figcaption class="video-cap"><b>Lint Rolling</b> <span class="pill super">Supervisor</span></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== OVERVIEW ===================== -->
+<section id="overview">
+  <div class="wrap">
+    <span class="eyebrow">Overview</span>
+    <h2 class="sec-title">A human in every episode</h2>
+    <p class="sec-lead" style="max-width:860px">Existing robot manipulation datasets are collected in human-absent settings, so policies trained on them can perform a task in isolation but fail to act appropriately when a person is present.<br>HABIT closes this gap, with the goal of robot policies that can work alongside people.</p>
+
+    <div class="setup">
+      <figure class="fig">
+        <img src="static/figures/unit_setup.png" alt="Workspace setup: two robot arms, a human, and five RGB cameras marked in red" loading="lazy">
+      </figure>
+      <div>
+        <h3>The collection setup</h3>
+        <p>Bimanual manipulation captured with <strong>two Franka Research 3 arms</strong> and <strong>five synchronized RGB cameras</strong>, with a human sharing the workspace in every episode.</p>
+        <ul>
+          <li><b>Robot side (3):</b> two wrist cameras and one egocentric view facing the shared workspace.</li>
+          <li><b>Human side (2):</b> a head-mounted egocentric view and an exocentric view of the whole interaction.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="stats" style="margin-top:30px;">
+      <div class="stat"><div class="num" data-target="10563">0</div><div class="lbl">Episodes</div></div>
+      <div class="stat"><div class="num" data-target="164" data-suffix="h">0</div><div class="lbl">Hours of manipulation</div></div>
+      <div class="stat"><div class="num" data-target="60">0</div><div class="lbl">Tasks</div></div>
+      <div class="stat"><div class="num" data-target="308">0</div><div class="lbl">Unique human-robot subtask pairs</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ROLES ===================== -->
+<section id="roles">
+  <div class="wrap">
+    <span class="eyebrow">Task design</span>
+    <h2 class="sec-title">Three interaction roles</h2>
+    <p class="sec-lead" style="max-width:900px">Human-robot interaction takes many forms. To capture this diversity, we adopt three roles from the <strong>Human-Robot Interaction (HRI)</strong> literature, each defined by <em>how</em> the human and robot relate within a subtask.</p>
+    <div class="roles">
+      <div class="role collab">
+        <span class="pill collab">Collaborator</span>
+        <div class="role-meta">20 tasks · 3,198 episodes</div>
+        <h3>Act together</h3>
+        <p>The human and robot <strong>jointly accomplish a shared goal through direct physical interaction</strong> (e.g., handing over an object or jointly holding a bucket), and the robot must coordinate with the human both spatially and temporally.</p>
+      </div>
+      <div class="role cowork">
+        <span class="pill cowork">Coworker</span>
+        <div class="role-meta">20 tasks · 3,969 episodes</div>
+        <h3>Work side by side</h3>
+        <p>The human and robot <strong>perform separate tasks while sharing only the workspace</strong>; the robot must avoid collisions with the human to ensure safety.</p>
+      </div>
+      <div class="role super">
+        <span class="pill super">Supervisor</span>
+        <div class="role-meta">20 tasks · 3,396 episodes</div>
+        <h3>Follow direction</h3>
+        <p>The human <strong>directs the robot through explicit cues</strong> such as gestures or demonstrated actions, and the robot must infer the human's intent from visual input alone.</p>
+      </div>
+    </div>
+    <figure class="fig">
+      <img src="static/figures/fig_roles.png" alt="Sample HABIT tasks grouped by the three roles" loading="lazy">
+      <figcaption>A glimpse of the 60 tasks, grouped by role.</figcaption>
+    </figure>
+    <p class="body-p narrow" style="margin-top:30px;">A single instruction such as "clean the shelf together" is too ambiguous to elicit consistent demonstrations. So each task follows a <strong>task workflow</strong>: a directed graph of human (H<sub>i</sub>) and robot (R<sub>i</sub>) subtasks that fixes how the two agents divide and sequence the work.</p>
+    <h3 class="block-title">The task workflow, in motion</h3>
+    <p class="sec-lead">A representative workflow per role, with the robot's and human's cameras in sync.</p>
+    <div class="elic-tabs" id="wfTabs">
+      <button class="etab collab active" data-i="0"><span class="dot"></span>Collaborator</button>
+      <button class="etab cowork" data-i="1"><span class="dot"></span>Coworker</button>
+      <button class="etab super" data-i="2"><span class="dot"></span>Supervisor</button>
+    </div>
+    <p class="wf-hint">Plays through automatically &mdash; the highlighted subtask advances with the video. Click any node to jump to that step.</p>
+    <div class="wf-stage">
+
+      <div class="wfpanel show" data-i="0">
+        <div class="wf-layout">
+          <div class="wf-graph-wrap" data-role="collab"></div>
+          <div class="wf-right">
+            <div class="wf-instr"></div>
+            <div class="wf-views">
+              <figure class="video-card"><video src="static/videos/wf/collab_robot_v3.mp4" muted loop playsinline preload="metadata"></video><figcaption class="video-cap"><b>Robot view</b></figcaption></figure>
+              <figure class="video-card"><video src="static/videos/wf/collab_human.mp4" muted loop playsinline preload="metadata"></video><figcaption class="video-cap"><b>Human view</b></figcaption></figure>
+            </div>
+          </div>
+        </div>
+        <p class="wf-cap"><b>Table Service · Collaborator.</b> The human and robot take turns; each subtask waits for the partner to finish the previous one.</p>
+      </div>
+
+      <div class="wfpanel" data-i="1">
+        <div class="wf-layout">
+          <div class="wf-graph-wrap" data-role="cowork"></div>
+          <div class="wf-right">
+            <div class="wf-instr"></div>
+            <div class="wf-views">
+              <figure class="video-card"><video src="static/videos/wf/cowork_robot.mp4" muted loop playsinline preload="metadata"></video><figcaption class="video-cap"><b>Robot view</b></figcaption></figure>
+              <figure class="video-card"><video src="static/videos/wf/cowork_human.mp4" muted loop playsinline preload="metadata"></video><figcaption class="video-cap"><b>Human view</b></figcaption></figure>
+            </div>
+          </div>
+        </div>
+        <p class="wf-cap"><b>Shelf Cleaning · Coworker.</b> Two independent chains that share only the workspace.</p>
+      </div>
+
+      <div class="wfpanel" data-i="2">
+        <div class="wf-layout">
+          <div class="wf-graph-wrap" data-role="super"></div>
+          <div class="wf-right">
+            <div class="wf-instr"></div>
+            <div class="wf-views">
+              <figure class="video-card"><video src="static/videos/wf/super_robot.mp4" muted loop playsinline preload="metadata"></video><figcaption class="video-cap"><b>Robot view</b></figcaption></figure>
+              <figure class="video-card"><video src="static/videos/wf/super_human.mp4" muted loop playsinline preload="metadata"></video><figcaption class="video-cap"><b>Human view</b></figcaption></figure>
+            </div>
+          </div>
+        </div>
+        <p class="wf-cap"><b>Cup on Coaster · Supervisor.</b> The robot reads the human's placement cue from vision alone.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== REACTIVE ===================== -->
+<section id="reactive">
+  <div class="wrap">
+    <span class="eyebrow">How we collected the data</span>
+    <h2 class="sec-title">Reactive interaction</h2>
+    <p class="sec-lead" style="max-width:none">The rule behind every HABIT recording: each robot action responds to a cue the cameras can actually see.</p>
+    <div class="elic">
+      <div class="txt">
+        <p class="body-p">Because the robot operator knows the subtask sequence in advance, they could pre-execute the next subtask from memory rather than reacting to the human. For example, the robot operator might begin reaching toward a target object before the human ever points to it.</p>
+        <p class="body-p">This quietly breaks learning: the cue that triggers the action then falls <strong>outside the camera input</strong>, so no policy could ever recover the behavior from the recorded data.</p>
+        <p class="quote">"Each operator acts only after directly observing the partner's behavior. We prohibit any coordination signal that is not captured in the recorded observations, so every demonstrated action is grounded in cues that are also available to the policy."</p>
+      </div>
+      <figure class="video-card">
+        <video src="static/videos/reactive.mp4" muted loop playsinline controls preload="metadata"></video>
+        <figcaption class="video-cap"><b>Reactive interaction.</b> The robot operator acts only after an observable cue, so every trigger is captured in the data.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BEHAVIOR ELICITATION ===================== -->
+<section id="elicitation">
+  <div class="wrap">
+    <span class="eyebrow">Beyond reactivity</span>
+    <h2 class="sec-title" style="max-width:none">Eliciting human-aware behavior</h2>
+    <p class="sec-lead">Reactivity alone does not guarantee the human-aware behavior we want, so the collection protocol adds three deliberate design choices.</p>
+
+    <div class="elic-tabs">
+      <button class="etab cowork active" data-i="0"><span class="dot"></span>Safety-first yielding</button>
+      <button class="etab collab" data-i="1"><span class="dot"></span>Temporal adaptation</button>
+      <button class="etab super" data-i="2"><span class="dot"></span>Gesture grounding</button>
+    </div>
+
+    <div class="elic epanel show" data-i="0">
+      <div class="txt">
+        <span class="kicker" style="color:var(--cowork)">Yielding under safety-first priority</span>
+        <h3>The robot yields to keep the human safe</h3>
+        <p class="body-p">Human safety is the overriding constraint. Whenever the robot is about to collide with the human or a human-held object, the robot operator <strong>decisively retracts the arms</strong> rather than continuing the trajectory, so yielding becomes the robot's default recorded response.</p>
+      </div>
+      <figure class="video-card">
+        <video src="static/videos/safety.mp4" muted loop playsinline controls preload="metadata"></video>
+      </figure>
+    </div>
+
+    <div class="elic flip epanel" data-i="1">
+      <div class="txt">
+        <span class="kicker" style="color:var(--collab)">Temporal adaptation</span>
+        <h3>Matching the human's tempo</h3>
+        <p class="body-p">The human operator's movement speed is <strong>deliberately varied across episodes</strong>, so the data captures the robot adapting its pace to the human rather than moving at a single fixed cadence.</p>
+      </div>
+      <figure class="video-card">
+        <video src="static/videos/speed.mp4" muted loop playsinline controls preload="metadata"></video>
+      </figure>
+    </div>
+
+    <div class="elic epanel" data-i="2">
+      <div class="txt">
+        <span class="kicker" style="color:var(--super)">Gesture grounding</span>
+        <h3>No shortcut to the gesture</h3>
+        <p class="body-p">The risk is not that the robot follows words, but that it takes a <strong>shortcut</strong> and acts before the human has even pointed. So during collection, the human operator <strong>waits a random interval</strong> before gesturing, forcing the recorded behavior to depend on actually reading and grounding the gesture.</p>
+      </div>
+      <figure class="video-card">
+        <video src="static/videos/gesture.mp4" muted loop playsinline controls preload="metadata"></video>
+      </figure>
+    </div>
+
+    <div class="elic-nav">
+      <button class="enav" id="ePrev">&lsaquo;&nbsp; Prev</button>
+      <span class="edots" id="eDots"></span>
+      <button class="enav" id="eNext">Next &nbsp;&rsaquo;</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== RESULTS ===================== -->
+<section id="results">
+  <div class="wrap">
+    <span class="eyebrow">Experiments</span>
+    <h2 class="sec-title">Human-aware behavior emerges from data</h2>
+    <p class="sec-lead" style="max-width:880px">We fine-tune two open-source VLAs, <strong>&pi;<sub>0.5</sub></strong> and <strong>GR00T&nbsp;N1.6</strong>, on a six-task subset. Training steps and batch size are held fixed, so the dataset is the only variable. Each number is the mean over 20 trials.</p>
+
+    <div class="define">
+      <b>What is Robot-only?</b> The conventional baseline: the same tasks, environment, and robot operator as HABIT, but recorded with <b>no co-present human</b>. The robot does only its own share of the work in an empty workspace, and for Supervisor tasks it receives the same indexed instruction without the human's pointing gesture.
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-head">
+        <div>
+          <h4>Success rate across the six evaluation tasks</h4>
+          <p class="sub">Higher is better. Collaborator tasks need a human partner, so Robot-only is not applicable.</p>
+        </div>
+        <div class="toggle" id="modelToggle">
+          <button class="active" data-model="pi">&pi;<sub>0.5</sub></button>
+          <button data-model="groot">GR00T N1.6</button>
+        </div>
+      </div>
+      <div class="vchart">
+        <div class="vgrid" id="sGrid"></div>
+        <div class="vplot" id="sPlot"></div>
+      </div>
+      <div class="vx" id="sX"></div>
+      <div class="legend">
+        <span><i style="background:var(--ro)"></i>Robot-only</span>
+        <span><i style="background:var(--accent)"></i>HABIT (ours)</span>
+      </div>
+    </div>
+
+    <div class="takeaway">
+      <b>HABIT improves success on every comparable task</b>, with the largest gains on Coworker tasks, where workspace overlap demands reactive yielding (Box Packaging: 10% to 85% for &pi;<sub>0.5</sub>). The same pattern holds for GR00T N1.6, so the gain comes from the data: human-present demonstrations teach what conventional Robot-only data cannot.
+    </div>
+
+    <h3 class="block-title">Robot-only vs. HABIT, side by side</h3>
+    <p class="sec-lead">Real policy rollouts on the four tasks that have a Robot-only baseline. Watch how the HABIT policy yields and follows the human where Robot-only does not.</p>
+    <div class="elic-tabs" id="cmpTabs">
+      <button class="etab cowork active" data-i="0"><span class="dot"></span>Waste Sorting</button>
+      <button class="etab cowork" data-i="1"><span class="dot"></span>Box Packaging</button>
+      <button class="etab super" data-i="2"><span class="dot"></span>Donut Serving</button>
+      <button class="etab super" data-i="3"><span class="dot"></span>Food Storage</button>
+    </div>
+    <div class="cmp-stage">
+      <figure class="video-card cpanel show" data-i="0">
+        <video src="static/videos/cmp_waste-sorting.mp4" muted loop playsinline controls preload="metadata"></video>
+        <figcaption class="video-cap"><b>Waste Sorting</b> <span class="pill cowork">Coworker</span></figcaption>
+      </figure>
+      <figure class="video-card cpanel" data-i="1">
+        <video src="static/videos/cmp_box-packaging_new.mp4" muted loop playsinline controls preload="metadata"></video>
+        <figcaption class="video-cap"><b>Box Packaging</b> <span class="pill cowork">Coworker</span></figcaption>
+      </figure>
+      <figure class="video-card cpanel" data-i="2">
+        <video src="static/videos/cmp_donut-serving.mp4" muted loop playsinline controls preload="metadata"></video>
+        <figcaption class="video-cap"><b>Donut Serving</b> <span class="pill super">Supervisor</span></figcaption>
+      </figure>
+      <figure class="video-card cpanel" data-i="3">
+        <video src="static/videos/cmp_food-storage_new.mp4" muted loop playsinline controls preload="metadata"></video>
+        <figcaption class="video-cap"><b>Food Storage</b> <span class="pill super">Supervisor</span></figcaption>
+      </figure>
+    </div>
+    <div class="elic-nav">
+      <button class="enav" id="cPrev">&lsaquo;&nbsp; Prev</button>
+      <span class="edots" id="cDots"></span>
+      <button class="enav" id="cNext">Next &nbsp;&rsaquo;</button>
+    </div>
+
+    <h3 class="block-title">Role-specific failures, sharply reduced</h3>
+    <p class="sec-lead" style="max-width:none">Each role has a characteristic failure mode. HABIT instills the behaviors that human-absent data cannot teach.</p>
+    <figure class="fig">
+      <img src="static/figures/chart_fail_main.png" alt="Role-specific failure rates: Shelf Cleaning, Waste Sorting, Food Storage" loading="lazy">
+      <figcaption><b>One representative task per role (lower is better).</b> Robot-only is not applicable for the Collaborator task (no human partner). On the tasks with a baseline, HABIT greatly lowers the role-specific failures (collisions, gesture-following) for both models; on Waste Sorting, &pi;<sub>0.5</sub> collisions fall from 60% to 0%.</figcaption>
+    </figure>
+    <figure class="fig">
+      <img src="static/figures/chart_fail_extra_v2.png" alt="Role-specific failure rates: Table Serving, Box Packaging, Donut Serving" loading="lazy">
+      <figcaption><b>The second evaluation task per role shows the same trend.</b> The reduction is clearest where the role-specific challenge is hardest: Box Packaging collisions fall sharply under HABIT for both models.</figcaption>
+    </figure>
+
+    <h3 class="block-title">A strong prior for new tasks</h3>
+    <p class="sec-lead" style="max-width:900px">Mid-training &pi;<sub>0.5</sub> on HABIT, then fine-tuning on a new task, beats fine-tuning from scratch at every data budget. HABIT transfers as a reusable prior for human-robot interaction.</p>
+    <figure class="fig">
+      <img src="static/figures/fig_sample_eff.png" alt="Sample efficiency: HABIT mid-training vs direct fine-tuning" loading="lazy">
+      <figcaption><b>Sample efficiency of HABIT mid-training vs. direct fine-tuning.</b> On Waste Sorting, mid-training with just <b>50 demonstrations matches direct fine-tuning at 200</b>. On Shelf Cleaning, direct fine-tuning never exceeds 45% even at 200 demos, while mid-training reaches 60% with only 100.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== BIBTEX ===================== -->
+<section id="bibtex">
+  <div class="wrap narrow">
+    <span class="eyebrow">Cite</span>
+    <h2 class="sec-title">BibTeX</h2>
+    <pre><code id="bib">TBD</code></pre>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>HABIT &middot; Human-Aware Behavior and Interaction Training Dataset &middot; Config &amp; KAIST</p>
+  </div>
+</footer>
+
+<script>
+// ---- animated stat counters ----
+const fmt = n => n.toLocaleString('en-US');
+function animateCounter(el){
+  const target = +el.dataset.target, suffix = el.dataset.suffix || '';
+  const dur = 1400, t0 = performance.now();
+  (function step(now){
+    const p = Math.min(1,(now-t0)/dur), e = 1-Math.pow(1-p,3);
+    el.textContent = fmt(Math.round(target*e)) + (suffix?(' '+suffix):'');
+    if(p<1) requestAnimationFrame(step);
+    else el.innerHTML = fmt(target) + (suffix?(' <small>'+suffix+'</small>'):'');
+  })(performance.now());
+}
+
+// ---- interactive success-rate chart ----
+const SUCCESS = {
+  pi: [
+    {t:'Shelf Cleaning', role:'collab', ro:null, h:45},
+    {t:'Table Service',  role:'collab', ro:null, h:95},
+    {t:'Waste Sorting',  role:'cowork', ro:40,  h:65},
+    {t:'Box Packaging',  role:'cowork', ro:10,  h:85},
+    {t:'Food Storage',   role:'super',  ro:50,  h:70},
+    {t:'Donut Serving',  role:'super',  ro:95,  h:95},
+  ],
+  groot: [
+    {t:'Shelf Cleaning', role:'collab', ro:null, h:0},
+    {t:'Table Service',  role:'collab', ro:null, h:0},
+    {t:'Waste Sorting',  role:'cowork', ro:0,   h:35},
+    {t:'Box Packaging',  role:'cowork', ro:0,   h:25},
+    {t:'Food Storage',   role:'super',  ro:10,  h:25},
+    {t:'Donut Serving',  role:'super',  ro:55,  h:65},
+  ]
+};
+const ROLE_NAME = {collab:'Collaborator',cowork:'Coworker',super:'Supervisor'};
+let curModel = 'pi';
+
+function buildGrid(){
+  const g = document.getElementById('sGrid');
+  g.innerHTML = '';
+  [0,20,40,60,80,100].forEach(v=>{
+    const line = document.createElement('div');
+    line.className='gl'; line.style.bottom = v+'%';
+    line.innerHTML = '<span>'+v+'</span>';
+    g.appendChild(line);
+  });
+}
+function buildSuccess(){
+  const rows = SUCCESS[curModel];
+  const plot = document.getElementById('sPlot'), xl = document.getElementById('sX');
+  plot.innerHTML=''; xl.innerHTML='';
+  rows.forEach(r=>{
+    const col = document.createElement('div'); col.className='vcol';
+    const b1 = document.createElement('div');
+    b1.className = 'vbar ' + (r.ro===null ? 'na' : 'ro');
+    b1.dataset.h = (r.ro===null ? 0 : r.ro);
+    b1.innerHTML = '<span class="vval">'+(r.ro===null ? 'N/A' : r.ro+'%')+'</span>';
+    const b2 = document.createElement('div');
+    b2.className = 'vbar habit'; b2.dataset.h = r.h;
+    b2.innerHTML = '<span class="vval">'+r.h+'%</span>';
+    col.appendChild(b1); col.appendChild(b2); plot.appendChild(col);
+    const lab = document.createElement('div');
+    lab.innerHTML = r.t + '<br><span class="rx '+r.role+'">'+ROLE_NAME[r.role]+'</span>';
+    xl.appendChild(lab);
+  });
+  applyHeights();
+}
+function applyHeights(){
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('#sPlot .vbar').forEach(b=>{
+      if(!b.classList.contains('na')) b.style.height = b.dataset.h+'%';
+    });
+  });
+}
+buildGrid(); buildSuccess();
+
+document.querySelectorAll('#modelToggle button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#modelToggle button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    curModel = btn.dataset.model;
+    buildSuccess();
+  });
+});
+
+// ---- behavior elicitation toggle (one at a time) ----
+const etabs = [...document.querySelectorAll('#elicitation .etab')];
+const epanels = [...document.querySelectorAll('.epanel')];
+const eDots = document.getElementById('eDots');
+let eIdx = 0;
+if(eDots) epanels.forEach(()=>eDots.appendChild(document.createElement('i')));
+function showElic(i){
+  eIdx = (i + epanels.length) % epanels.length;
+  etabs.forEach((t,j)=>t.classList.toggle('active', j===eIdx));
+  epanels.forEach((p,j)=>{
+    const on = j===eIdx;
+    p.classList.toggle('show', on);
+    const v = p.querySelector('video');
+    if(v){ if(on){ v.play().catch(()=>{}); } else { v.pause(); } }
+  });
+  if(eDots) [...eDots.children].forEach((d,j)=>d.classList.toggle('on', j===eIdx));
+}
+etabs.forEach((t,i)=>t.addEventListener('click',()=>showElic(i)));
+const ePrev = document.getElementById('ePrev'), eNext = document.getElementById('eNext');
+if(ePrev) ePrev.addEventListener('click',()=>showElic(eIdx-1));
+if(eNext) eNext.addEventListener('click',()=>showElic(eIdx+1));
+showElic(0);
+
+// ---- HABIT vs Robot-only video toggle ----
+const ctabs = [...document.querySelectorAll('#cmpTabs .etab')];
+const cpanels = [...document.querySelectorAll('.cpanel')];
+const cDots = document.getElementById('cDots');
+let cIdx = 0;
+if(cDots) cpanels.forEach(()=>cDots.appendChild(document.createElement('i')));
+function showCmp(i){
+  cIdx = (i + cpanels.length) % cpanels.length;
+  ctabs.forEach((t,j)=>t.classList.toggle('active', j===cIdx));
+  cpanels.forEach((p,j)=>{
+    const on = j===cIdx;
+    p.classList.toggle('show', on);
+    const v = p.querySelector('video');
+    if(v){ if(on){ v.play().catch(()=>{}); } else { v.pause(); } }
+  });
+  if(cDots) [...cDots.children].forEach((d,j)=>d.classList.toggle('on', j===cIdx));
+}
+ctabs.forEach((t,i)=>t.addEventListener('click',()=>showCmp(i)));
+const cPrev = document.getElementById('cPrev'), cNext = document.getElementById('cNext');
+if(cPrev) cPrev.addEventListener('click',()=>showCmp(cIdx-1));
+if(cNext) cNext.addEventListener('click',()=>showCmp(cIdx+1));
+showCmp(0);
+
+// ---- task-workflow dual-view player (robot + human in sync) ----
+// node-graph data (colors + edges match paper Figure 2)
+const WF = {
+  collab:{ vb:[0,0,240,240], edges:[['H1','R1'],['R1','H2'],['H2','R2']], nodes:[
+    {id:'H1',col:'H',x:168,y:48,c:'#f8d0d0',start:0,end:8,instr:'Approach one of the trays with a napkin'},
+    {id:'R1',col:'R',x:72,y:103,c:'#f0e878',start:8.1,end:19.6,instr:'Pick up the cup and bowl and hold them up'},
+    {id:'H2',col:'H',x:168,y:158,c:'#b8f8c0',start:19.7,end:23.3,instr:'Lay the napkin flat on the tray'},
+    {id:'R2',col:'R',x:72,y:213,c:'#d0e0f8',start:23.4,end:28.1,instr:'Place the cup and bowl back on the tray'} ]},
+  cowork:{ vb:[0,0,240,278], edges:[['R1','R2'],['H1','H2'],['H2','H3']], nodes:[
+    {id:'R1',col:'R',x:72,y:56,c:'#f8d0d0',start:0,end:6.9,instr:'Clean a randomly selected shelf level with a duster'},
+    {id:'R2',col:'R',x:72,y:222,c:'#d0e0f8',start:10.9,end:18.9,instr:'Clean another shelf level'},
+    {id:'H1',col:'H',x:168,y:56,c:'#f8d0d0',start:0,end:6.9,instr:'Clean a randomly selected shelf level with a duster'},
+    {id:'H2',col:'H',x:168,y:139,c:'#b8f8c0',start:7.0,end:13.6,instr:'Clean another shelf level'},
+    {id:'H3',col:'H',x:168,y:222,c:'#d0e0f8',start:13.7,end:18.9,instr:'Clean a third shelf level'} ]},
+  super:{ vb:[0,0,240,152], edges:[['H1','R1']], nodes:[
+    {id:'H1',col:'H',x:168,y:50,c:'#f8d0d0',start:0,end:2.6,instr:'Place a coaster at a desired location'},
+    {id:'R1',col:'R',x:72,y:112,c:'#d0e0f8',start:2.7,end:26,instr:'Place a plastic cup on a coaster'} ]}
+};
+const WF_R = 25, SVGNS = 'http://www.w3.org/2000/svg';
+function buildGraph(wrap){
+  const d = WF[wrap.dataset.role]; if(!d) return;
+  const svg = document.createElementNS(SVGNS,'svg');
+  svg.setAttribute('viewBox', d.vb.join(' ')); svg.setAttribute('class','wf-svg');
+  const colX = {}; d.nodes.forEach(n=>{ colX[n.col]=n.x; });
+  const addCol = (x,label)=>{ const t=document.createElementNS(SVGNS,'text'); t.setAttribute('class','wf-col'); t.setAttribute('x',x); t.setAttribute('y',16); t.textContent=label; svg.appendChild(t); };
+  if(colX.R!=null) addCol(colX.R,'Robot');
+  if(colX.H!=null) addCol(colX.H,'Human');
+  const byId={}; d.nodes.forEach(n=>{ byId[n.id]=n; });
+  d.edges.forEach(([a,b])=>{
+    const na=byId[a], nb=byId[b];
+    const dx=nb.x-na.x, dy=nb.y-na.y, L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L;
+    const x1=na.x+ux*WF_R, y1=na.y+uy*WF_R, tipx=nb.x-ux*WF_R, tipy=nb.y-uy*WF_R;
+    const bx=tipx-ux*9, by=tipy-uy*9, px=-uy*5, py=ux*5;
+    const line=document.createElementNS(SVGNS,'line');
+    line.setAttribute('class','wf-edge'); line.setAttribute('x1',x1); line.setAttribute('y1',y1); line.setAttribute('x2',bx); line.setAttribute('y2',by);
+    svg.appendChild(line);
+    const tri=document.createElementNS(SVGNS,'polygon'); tri.setAttribute('class','wf-arrow');
+    tri.setAttribute('points', tipx+','+tipy+' '+(bx+px)+','+(by+py)+' '+(bx-px)+','+(by-py));
+    svg.appendChild(tri);
+  });
+  d.nodes.forEach((n,i)=>{
+    const g=document.createElementNS(SVGNS,'g'); g.setAttribute('class','wnode'); g.dataset.id=n.id; g.dataset.start=n.start; g.dataset.end=n.end;
+    const c=document.createElementNS(SVGNS,'circle'); c.setAttribute('cx',n.x); c.setAttribute('cy',n.y); c.setAttribute('r',WF_R); c.setAttribute('fill',n.c);
+    const t=document.createElementNS(SVGNS,'text'); t.setAttribute('x',n.x); t.setAttribute('y',n.y); t.textContent=n.id;
+    g.appendChild(c); g.appendChild(t); svg.appendChild(g);
+  });
+  wrap.appendChild(svg);
+}
+document.querySelectorAll('.wf-graph-wrap').forEach(buildGraph);
+
+const wftabs = [...document.querySelectorAll('#wfTabs .etab')];
+const wfpanels = [...document.querySelectorAll('.wfpanel')];
+// visibility: only the master (robot) is auto-played; the human view follows it
+const wfMasterObs = ('IntersectionObserver' in window) ? new IntersectionObserver((es)=>{
+  es.forEach(e=>{ if(e.isIntersecting) e.target.play().catch(()=>{}); else e.target.pause(); });
+},{threshold:.4}) : null;
+
+wfpanels.forEach(panel=>{
+  const data = WF[panel.querySelector('.wf-graph-wrap').dataset.role];
+  const vids = [...panel.querySelectorAll('.wf-views video')];
+  const master = vids[0], slave = vids[1];
+  const instrBox = panel.querySelector('.wf-instr');
+  const nodes = [...panel.querySelectorAll('.wnode')];
+  let sig = null;
+  // highlight every node whose [start,end) contains t (robot & human advance independently)
+  function renderActive(t){
+    const active = data.nodes.filter(n=> t >= n.start && t < n.end);
+    if(!active.length) return;                 // brief gap between subtasks: keep previous
+    const newSig = active.map(n=>n.id).join(',');
+    if(newSig===sig) return;
+    sig = newSig;
+    const ids = new Set(active.map(n=>n.id));
+    nodes.forEach(g=>g.classList.toggle('active', ids.has(g.dataset.id)));
+    const sorted = [...active].sort((a,b)=>(a.col==='R'?0:1)-(b.col==='R'?0:1));
+    instrBox.innerHTML = sorted.map(n=>{ const ins=/[.!?]$/.test(n.instr)?n.instr:n.instr+'.'; return '<div class="wf-iline" style="background:'+n.c+'"><b>'+n.id+':</b> '+ins+'</div>'; }).join('');
+  }
+  if(master){
+    master.addEventListener('timeupdate', ()=>{
+      if(slave && !slave.seeking && Math.abs(master.currentTime - slave.currentTime) > 0.1){ try{ slave.currentTime = master.currentTime; }catch(e){} }
+      renderActive(master.currentTime);   // nodes + instructions auto-advance with playback
+    });
+    if(slave){
+      master.addEventListener('play', ()=> slave.play().catch(()=>{}));
+      master.addEventListener('pause', ()=> slave.pause());
+      master.addEventListener('seeked', ()=>{ try{ slave.currentTime = master.currentTime; }catch(e){} });
+    }
+    if(wfMasterObs) wfMasterObs.observe(master);
+  }
+  // click a node -> jump to that subtask's start and keep playing through
+  nodes.forEach(g=>g.addEventListener('click', ()=>{
+    const t = parseFloat(g.dataset.start) || 0;
+    vids.forEach(v=>{ try{ v.currentTime = t; }catch(e){} });
+    sig = null; renderActive(t + 0.01);
+    if(master) master.play().catch(()=>{});
+  }));
+  panel._start = ()=>{ vids.forEach(v=>{ try{ v.currentTime = 0; }catch(e){} }); sig=null; renderActive(0); if(master) master.play().catch(()=>{}); };
+  panel._pauseAll = ()=>{ vids.forEach(v=>v.pause()); };
+});
+function showWf(i){
+  const idx = (i + wfpanels.length) % wfpanels.length;
+  wftabs.forEach((t,j)=>t.classList.toggle('active', j===idx));
+  wfpanels.forEach((p,j)=>{
+    const on = j===idx;
+    p.classList.toggle('show', on);
+    if(on){ if(p._start) p._start(); } else { if(p._pauseAll) p._pauseAll(); }
+  });
+}
+wftabs.forEach((t,i)=>t.addEventListener('click',()=>showWf(i)));
+showWf(0);
+
+// ---- gallery filter (no IO dependency) ----
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const f = tab.dataset.filter;
+    document.querySelectorAll('.gallery .video-card').forEach(card=>{
+      card.classList.toggle('hide', !(f==='all'||card.dataset.role===f));
+    });
+  });
+});
+
+const hasIO = 'IntersectionObserver' in window;
+
+// ---- reveal on scroll: counters + chart bars ----
+if(hasIO){
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting) return;
+      if(e.target.classList.contains('num')) animateCounter(e.target);
+      if(e.target.id==='sPlot') applyHeights();
+      io.unobserve(e.target);
+    });
+  },{threshold:.4});
+  document.querySelectorAll('.num').forEach(el=>io.observe(el));
+  const sp = document.getElementById('sPlot'); if(sp) io.observe(sp);
+
+  // ---- play videos only while visible ----
+  const vio = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ const v=e.target; if(e.isIntersecting) v.play().catch(()=>{}); else v.pause(); });
+  },{threshold:.35});
+  document.querySelectorAll('video').forEach(v=>{ if(!v.closest('.wfpanel')) vio.observe(v); });
+
+  // ---- nav active state on scroll ----
+  const navLinks = [...document.querySelectorAll('nav .links a')];
+  const secs = navLinks.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const navio = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        navLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href')==='#'+e.target.id));
+      }
+    });
+  },{rootMargin:'-45% 0px -50% 0px'});
+  secs.forEach(s=>navio.observe(s));
+} else {
+  // fallback: no IntersectionObserver
+  document.querySelectorAll('.num').forEach(animateCounter);
+  document.querySelectorAll('video').forEach(v=>v.play().catch(()=>{}));
+}
+</script>
+</body>
+</html>

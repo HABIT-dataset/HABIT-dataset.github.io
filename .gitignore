@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+
+# Superseded assets (replaced by interactive charts / trimmed wf clips)
+static/figures/chart_fail_extra.png
+static/figures/chart_success_groot.png
+static/figures/chart_success_pi.png
+static/figures/fig_workflow.png
+static/videos/wf_collab_robot.mp4
+static/videos/wf_collab_human.mp4
+static/videos/wf_cowork_robot.mp4
+static/videos/wf_cowork_human.mp4
+static/videos/wf_super_robot.mp4
+static/videos/wf_super_human.mp4
+
+# Old comparison clips with the black bar (replaced by *_new.mp4) + failed temp
+static/videos/cmp_box-packaging.mp4
+static/videos/cmp_food-storage.mp4
+static/videos/cmp_box-packaging_v2.mp4
+
+# Old workflow robot-view clips (collab); v3 is the one in use (0-23 masked / 23-25 original / 25+ masked)
+static/videos/wf/collab_robot.mp4
+static/videos/wf/collab_robot_v2.mp4
+static/videos/wf/collab_robot_v4.mp4
