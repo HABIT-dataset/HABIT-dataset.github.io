@@ -3,6 +3,9 @@
 
 # Superseded assets (replaced by interactive charts / trimmed wf clips)
 static/figures/chart_fail_extra.png
+static/figures/chart_fail_main.png
+static/figures/chart_fail_extra_v2.png
+static/figures/fig_sample_eff.png
 static/figures/chart_success_groot.png
 static/figures/chart_success_pi.png
 static/figures/fig_workflow.png
@@ -22,3 +25,4 @@ static/videos/cmp_box-packaging_v2.mp4
 static/videos/wf/collab_robot.mp4
 static/videos/wf/collab_robot_v2.mp4
 static/videos/wf/collab_robot_v4.mp4
+
