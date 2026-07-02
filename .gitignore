@@ -26,3 +26,6 @@ static/videos/wf/collab_robot.mp4
 static/videos/wf/collab_robot_v2.mp4
 static/videos/wf/collab_robot_v4.mp4
 
+
+# food comparison replaced by v3 (user-provided food.mp4)
+static/videos/cmp_food-storage_new.mp4
